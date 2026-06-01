@@ -1,6 +1,6 @@
 {
   "name": "ebook-ai-agent",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "description": "Repo compagnon de l'ebook « Créer des agents IA en TypeScript » — projet fil rouge RDV-Pro",
   "type": "module",
@@ -16,6 +16,7 @@
     "mcp:server": "tsx src/mcp/server.ts",
     "mcp:probe": "tsx -r dotenv/config scripts/probe-mcp.ts",
     "generate-descriptions": "tsx src/generate-descriptions.ts",
+    "eval": "tsx evals/run-evals.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

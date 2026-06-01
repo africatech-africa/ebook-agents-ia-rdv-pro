@@ -12,6 +12,7 @@
 import { generateObject } from "ai";
 import { z } from "zod";
 import { google, FLASH } from "../lib/llm";
+import { trace } from "../lib/trace";
 
 export type AgentName = "booking" | "support" | "marketing";
 
@@ -51,20 +52,42 @@ export async function routeIntent(
   history: { role: string; content: string }[],
   message: string,
 ): Promise<{ agent: AgentName; reason: string }> {
-  const { object } = await generateObject({
-    model: google(FLASH),
-    schema: RouterDecision,
-    system: SYSTEM,
-    prompt:
-      `Historique récent :\n${formatHistory(history)}\n\n` +
-      `Nouveau message : ${message}\n\n` +
-      `Choisis l'agent.`,
-    temperature: 0,
-    providerOptions: {
-      google: {
-        thinkingConfig: { thinkingBudget: 0 },
+  const t0 = Date.now();
+  try {
+    const { object } = await generateObject({
+      model: google(FLASH),
+      schema: RouterDecision,
+      system: SYSTEM,
+      prompt:
+        `Historique récent :\n${formatHistory(history)}\n\n` +
+        `Nouveau message : ${message}\n\n` +
+        `Choisis l'agent.`,
+      temperature: 0,
+      providerOptions: {
+        google: {
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       },
-    },
-  });
-  return object;
+    });
+    trace({
+      kind: "route",
+      agent: object.agent,
+      reason: object.reason,
+      latencyMs: Date.now() - t0,
+    });
+    return object;
+  } catch (err) {
+    // Gemini occasionally returns malformed JSON despite a
+    // structured-output schema. We do NOT fail the conversation —
+    // we fall back to the most common case ("booking") so the
+    // client still gets a useful reply, and we log the incident.
+    trace({
+      kind: "route_failure",
+      fallback: "booking",
+      message: message.slice(0, 80),
+      latencyMs: Date.now() - t0,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return { agent: "booking", reason: "router fallback" };
+  }
 }

@@ -1,0 +1,8 @@
+{"id":"slots-monday","question":"Des places lundi 25 mai ?","expectAgent":"booking","expectToolUsed":"getSlots","expectAnswerMatches":"9h|10h|14h"}
+{"id":"price-coupe","question":"Combien coute une coupe femme ?","expectAgent":"booking","expectToolUsed":"searchKnowledge","expectAnswerMatches":"8\\s?000.*FCFA|8\\s000"}
+{"id":"price-tresses","question":"Vos tresses longues, c'est combien ?","expectAgent":"booking","expectToolUsed":"searchKnowledge","expectAnswerMatches":"35\\s?000"}
+{"id":"cancel-policy","question":"Quelle est votre politique d'annulation ?","expectAgent":"support","expectToolUsed":"searchKnowledge","expectAnswerMatches":"24\\s?h|5\\s?000"}
+{"id":"hours-saturday","question":"Vous êtes ouverts à quelle heure le samedi ?","expectAgent":"booking","expectToolUsed":"searchKnowledge","expectAnswerMatches":"9\\s?h|18\\s?h"}
+{"id":"promo-cards","question":"Vous avez des cartes cadeaux ?","expectAgent":"marketing","expectToolUsed":"searchKnowledge","expectAnswerMatches":"10\\s?000|20\\s?000|50\\s?000"}
+{"id":"sunday-closed","question":"Vous travaillez le dimanche ?","expectAgent":"booking","expectToolUsed":"searchKnowledge","expectAnswerMatches":"fermé|dimanche"}
+{"id":"languages","question":"Vous parlez anglais au salon ?","expectAgent":"booking","expectToolUsed":"searchKnowledge","expectAnswerMatches":"anglais|Aïcha|Aicha"}

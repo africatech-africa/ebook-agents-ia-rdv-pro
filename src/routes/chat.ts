@@ -1,14 +1,10 @@
-// src/routes/chat.ts — POST /chat with multi-agent routing.
+// src/routes/chat.ts — POST /chat with multi-agent routing + trace.
 //
-// Chapter 9: instead of a single all-purpose agent, the request is
-// first classified by the router (one small LLM call), then
-// dispatched to ONE of three specialists (booking, support,
-// marketing). Each specialist owns its tools and its system prompt.
-// The conversation history is shared, so the active agent can
-// change between turns and still see everything said before.
-//
-// The chosen agent name is returned in the X-Agent header so the
-// client can show a "transferred to support" hint if useful.
+// Chapter 9 added routing to one of three specialists. Chapter 11
+// adds observability: a structured `trace` event at the start and
+// end of every turn (router choice is traced inside the router).
+// Traces go to stderr as JSONL, leaving stdout free for the
+// streamed response.
 
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
@@ -22,6 +18,7 @@ import {
   newConversationId,
   saveMessage,
 } from "../db/messages";
+import { trace } from "../lib/trace";
 
 export const chatRoute = new Hono();
 
@@ -50,8 +47,14 @@ chatRoute.post("/", async (c) => {
   await saveMessage(conversationId, "user", message);
   const history = await loadHistory(conversationId);
 
-  // Route AFTER persisting and reloading: the router sees the full
-  // history (minus the just-saved message, passed separately).
+  const turnStart = Date.now();
+  trace({
+    kind: "turn_start",
+    conversationId,
+    historyLength: history.length,
+    messageLength: message.length,
+  });
+
   const { agent: agentName } = await routeIntent(
     history.slice(0, -1),
     message,
@@ -84,5 +87,16 @@ chatRoute.post("/", async (c) => {
     if (assistantText.trim().length > 0) {
       await saveMessage(conversationId, "assistant", assistantText);
     }
+
+    const usage = await result.usage;
+    trace({
+      kind: "turn_end",
+      conversationId,
+      agent: agentName,
+      latencyMs: Date.now() - turnStart,
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
+      assistantLength: assistantText.length,
+    });
   });
 });

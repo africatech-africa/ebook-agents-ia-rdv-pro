@@ -7,6 +7,44 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.11.0] - Chapitre 11 — Observabilité, évals et debugging
+
+### Added
+
+- Chapitre 11 (`ebook/11-observability.md`) — concepts trace /
+  span / generation / run, évals comportementales, LLM-as-judge
+  en variation, debug par trace, 3 pièges (stdout pollution,
+  évals trop strictes, évals trop laxes), 3 exercices, intégration
+  Langfuse via OTel décrite en variation.
+- `src/lib/trace.ts` — wrapper d'observabilité minimal,
+  événements JSONL sur stderr (jamais stdout, par cohérence
+  avec le streaming HTTP de Hono et le JSON-RPC MCP). Coupable
+  via `TRACE=off`.
+- `evals/dataset.jsonl` — 8 cas de comportement couvrant les
+  trois routes (booking, support, marketing) et les deux tools
+  RAG-able.
+- `evals/run-evals.ts` — runner stable : `temperature: 0`,
+  `thinkingBudget: 0`, try/catch par cas, exit code = nombre
+  d'échecs. Tokens et latence rapportés par cas + en total.
+
+### Changed
+
+- `src/agents/router.ts` — try/catch autour de `generateObject`
+  avec fallback déterministe vers `booking` et log de l'échec
+  via `trace`. Plus aucune route ne peut faire crasher la
+  conversation à cause d'un JSON malformé de Gemini.
+- `src/routes/chat.ts` — émet `turn_start` au début et `turn_end`
+  (latence, tokens, longueur de réponse) à la fin de chaque
+  tour. Aucun impact perceptible sur la latence.
+
+### Stability
+
+- Deux runs consécutifs du suite confirment **8/8 stable**,
+  mêmes tokens d'entrée à l'identique, même set de verdicts.
+  La variance résiduelle vient du backoff Gemini (rate-limit)
+  sur certains cas — observée en live et documentée dans le
+  chapitre.
+
 ## [0.10.0] - Chapitre 10 — MCP : le standard pour brancher des outils
 
 ### Added
