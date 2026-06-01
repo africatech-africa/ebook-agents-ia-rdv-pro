@@ -7,6 +7,26 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.4.0] - Chapitre 4 — Les tools : donner des super-pouvoirs au LLM
+
+### Added
+
+- Chapitre 4 (`ebook/04-les-tools.md`) — anatomie d'un tool, Zod et
+  `z.infer`, boucle multi-étapes (`stopWhen` / `stepCountIs`),
+  SQLite avec `better-sqlite3`.
+- Couche de base de données : schéma (`src/db/schema.sql`), client
+  partagé (`src/db/client.ts`), seed (`src/db/seed.ts`) qui génère
+  48 créneaux sur 6 jours dont 3 réservés.
+- Premier tool de RDV-Pro : `getSlots(date)`
+  (`src/agents/tools/get-slots.ts`).
+- Branchement du tool sur `POST /chat` (`src/routes/chat.ts`) avec
+  un system prompt directif pour forcer l'appel à `getSlots`.
+
+### Dependencies
+
+- `zod@^4`, `better-sqlite3@^12`.
+- `@types/better-sqlite3@^7` (dev).
+
 ## [0.3.0] - Chapitre 3 — Premier contact : ton premier appel à Gemini en TypeScript
 
 ### Added
