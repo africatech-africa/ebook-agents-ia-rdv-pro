@@ -1,0 +1,29 @@
+{
+  // Configuration TypeScript de RDV-Pro.
+  // Volontairement minimale : elle est expliquée ligne par ligne au chapitre 3.
+  "compilerOptions": {
+    // La version de JavaScript que TypeScript vise. ES2022 = Node.js 20+.
+    "target": "ES2022",
+    "lib": ["ES2022"],
+
+    // On utilise les modules ESM (import/export), pas CommonJS (require).
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+
+    // strict = tous les garde-fous de TypeScript activés. C'est ce qui
+    // évite des classes entières de bugs avant même de lancer le code.
+    "strict": true,
+
+    // On exécute le TypeScript directement avec tsx : pas de compilation,
+    // donc pas de fichiers .js générés.
+    "noEmit": true,
+
+    // Confort et cohérence entre machines.
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["src", "evals"]
+}
