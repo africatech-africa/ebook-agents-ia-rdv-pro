@@ -1,14 +1,12 @@
-# Créer des agents IA en TypeScript
+# RDV-Pro — Code compagnon de l'ebook « Créer des agents IA en TypeScript »
 
-> Repo compagnon de l'ebook **« Créer des agents IA en TypeScript »**.
-> De ton premier appel LLM à un assistant déployé en production — en
-> construisant un vrai projet : **RDV-Pro**.
+> Le **code** du projet fil rouge de l'ebook **« Créer des agents IA en
+> TypeScript »**. De ton premier appel LLM à un assistant déployé en
+> production — en construisant un vrai projet : **RDV-Pro**.
 
-Ce dépôt contient deux choses :
-
-- **Le texte de l'ebook**, dans [`ebook/`](./ebook) — 12 chapitres + annexes.
-- **Le code du projet fil rouge RDV-Pro**, dans `src/`, versionné
-  **chapitre par chapitre** : une branche et un tag par chapitre.
+Ce dépôt contient **uniquement le code** du projet, versionné
+**chapitre par chapitre** : une branche et un tag par chapitre. Le texte
+de l'ebook est vendu à part (voir [L'ebook](#lebook)).
 
 ## RDV-Pro, c'est quoi ?
 
@@ -32,16 +30,16 @@ LLM jusqu'au déploiement.
 ## Quick start
 
 ```bash
-git clone https://github.com/africatech-africa/ebook-ai-agent
-cd ebook-ai-agent
+git clone https://github.com/africatech-africa/ebook-agents-ia-rdv-pro
+cd ebook-agents-ia-rdv-pro
 npm install
 cp .env.example .env   # ajoute ta clé GOOGLE_GENERATIVE_AI_API_KEY
 npm run dev            # lance le projet
 ```
 
-> Le code des agents prend vie à partir du **chapitre 1**. Au démarrage, le
-> dépôt contient le squelette (configuration, scripts, texte de l'ebook) ;
-> les fonctionnalités arrivent chapitre après chapitre.
+> `main` contient le projet à son état final (fin du chapitre 12). Pour
+> suivre l'ebook depuis le début, place-toi sur la branche du chapitre
+> voulu (voir ci-dessous).
 
 ## Suivre l'ebook chapitre par chapitre
 
@@ -70,9 +68,9 @@ npm run dev
 ## Structure du dépôt
 
 ```
-ebook-ai-agent/
-├── ebook/        # Le texte de l'ebook (12 chapitres + annexes)
+ebook-agents-ia-rdv-pro/
 ├── src/          # Le code de RDV-Pro (agents, db, routes, lib)
+├── knowledge/    # Corpus RAG (à partir du chapitre 7)
 ├── evals/        # Tests de qualité de l'agent
 ├── scripts/      # Scripts utilitaires
 ├── public/       # Page HTML de démo (optionnelle)
@@ -97,12 +95,15 @@ Voir [`.env.example`](./.env.example) pour la liste complète.
 
 ## L'ebook
 
-Commence par la [préface](./ebook/00-preface.md) puis la
-[table des matières détaillée](./ebook/00-toc.md).
+Ce dépôt ne contient que le code. Le texte de l'ebook **« Créer des
+agents IA en TypeScript »** (12 chapitres + annexes) est un produit
+distinct, disponible à la vente. Les liens d'achat et la table des
+matières sont publiés sur la page de l'ouvrage.
 
 ## Roadmap
 
-Légende : ✅ publié · 🚧 en cours · ⬜ à venir
+Tous les chapitres sont publiés (✅). Le projet est complet jusqu'au
+déploiement en production (tag `v1.0.0`).
 
 - ✅ Chapitre 1 — Pourquoi les agents IA changent le développement
 - ✅ Chapitre 2 — Comment fonctionne un LLM (sans maths)
@@ -116,8 +117,6 @@ Légende : ✅ publié · 🚧 en cours · ⬜ à venir
 - ✅ Chapitre 10 — MCP : le standard pour brancher des outils
 - ✅ Chapitre 11 — Observabilité, évals et debugging
 - ✅ Chapitre 12 — Sécurité, coûts et déploiement
-
-> **Progression : chapitre 1/12.** Cette branche (`chapitre-01-*`, tag `v0.1.0`) reflète le code à la fin du chapitre 1. La suite arrive chapitre après chapitre.
 
 ## Licence
 
