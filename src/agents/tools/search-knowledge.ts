@@ -1,47 +1,30 @@
+// src/agents/tools/search-knowledge.ts — Vercel AI SDK wrapper.
+//
+// Thin wrapper around `findRelevantChunks`. The pure logic lives
+// in `src/agents/logic/find-knowledge.ts` so the MCP server
+// (chapter 10) can call the same code.
+
 import { tool } from "ai";
 import { z } from "zod";
-import { sql } from "../../db/client";
-import { embedText, vectorLiteral } from "../../lib/embeddings";
-
-type ChunkRow = {
-  source: string;
-  content: string;
-  similarity: number;
-};
+import { findRelevantChunks } from "../logic/find-knowledge";
 
 export const searchKnowledge = tool({
   description:
     "Cherche dans la base de connaissances du salon (services, " +
     "prix, politique d'annulation, FAQ, infos pratiques). Renvoie " +
-    "les passages les plus pertinents pour la question.",
+    "les passages les plus pertinents pour la question, avec leur " +
+    "source. À appeler avant toute réponse factuelle.",
 
   inputSchema: z.object({
     query: z
       .string()
-      .min(3)
+      .min(3, "La requête doit faire au moins 3 caractères.")
       .describe(
-        "Question reformulée en mots-clés ou en phrase courte.",
+        "Question reformulée en mots-clés ou en phrase courte. " +
+          "Exemples : 'politique d annulation', 'prix tresses " +
+          "longues', 'horaires samedi'.",
       ),
   }),
 
-  execute: async ({ query }) => {
-    const queryEmbedding = await embedText(query);
-    const vec = vectorLiteral(queryEmbedding);
-
-    const rows = (await sql`
-      SELECT
-        source,
-        content,
-        1 - (embedding <=> ${vec}::vector) AS similarity
-      FROM knowledge_chunks
-      ORDER BY embedding <=> ${vec}::vector
-      LIMIT 3
-    `) as ChunkRow[];
-
-    return rows.map((r) => ({
-      source: r.source,
-      content: r.content,
-      similarity: Number(r.similarity.toFixed(3)),
-    }));
-  },
+  execute: async ({ query }) => findRelevantChunks(query),
 });

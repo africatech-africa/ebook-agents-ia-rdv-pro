@@ -113,7 +113,7 @@ Légende : ✅ publié · 🚧 en cours · ⬜ à venir
 - ✅ Chapitre 7 — RAG : connecter un agent à tes données
 - ✅ Chapitre 8 — Workflows vs agents autonomes
 - ✅ Chapitre 9 — Multi-agents : faire collaborer plusieurs IAs
-- ⬜ Chapitre 10 — MCP : le standard pour brancher des outils
+- ✅ Chapitre 10 — MCP : le standard pour brancher des outils
 - ⬜ Chapitre 11 — Observabilité, évals et debugging
 - ⬜ Chapitre 12 — Sécurité, coûts et déploiement
 

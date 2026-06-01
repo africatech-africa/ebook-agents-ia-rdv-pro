@@ -7,6 +7,36 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.10.0] - Chapitre 10 — MCP : le standard pour brancher des outils
+
+### Added
+
+- Chapitre 10 (`ebook/10-mcp.md`) — architecture client/serveur,
+  transports stdio vs HTTP/SSE, trois primitives (tools, resources,
+  prompts), capabilities, négociation, le piège n°1 de
+  `NODE_EXTRA_CA_CERTS` qui ne traverse pas le sandbox stdio.
+- Serveur MCP `src/mcp/server.ts` — `McpServer` + `StdioServerTransport`,
+  expose `get_slots` et `search_knowledge` en read-only. Aucun tool
+  d'écriture (pas de `bookSlot` / `cancelBooking` sur MCP tant qu'il
+  n'y a pas d'auth).
+- Logique pure extraite dans `src/agents/logic/find-slots.ts` et
+  `src/agents/logic/find-knowledge.ts` — framework-free, partagée
+  entre les wrappers Vercel AI SDK et MCP.
+- Client de probe `scripts/probe-mcp.ts` — spawn le serveur, liste
+  les tools, appelle les deux, prouve que stdio + JSON-RPC + DB +
+  embeddings marchent bout-en-bout.
+- Scripts npm `mcp:server` et `mcp:probe`.
+
+### Changed
+
+- `src/agents/tools/get-slots.ts` et `src/agents/tools/search-knowledge.ts`
+  deviennent de **fins wrappers** au-dessus des fonctions de logique
+  pure — zéro duplication entre le tool Vercel et le tool MCP.
+
+### Dependencies
+
+- `@modelcontextprotocol/sdk@^1.29.0`.
+
 ## [0.9.0] - Chapitre 9 — Multi-agents : faire collaborer plusieurs IAs
 
 ### Added
