@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { db } from "../../db/client";
+import { sql } from "../../db/client";
 
 type SlotRow = { slot_time: string };
 
@@ -17,19 +17,17 @@ export const getSlots = tool({
         /^\d{4}-\d{2}-\d{2}$/,
         "La date doit être au format YYYY-MM-DD",
       )
-      .describe(
-        "Date pour laquelle chercher les créneaux libres.",
-      ),
+      .describe("Date pour laquelle chercher les créneaux libres."),
   }),
 
   execute: async ({ date }) => {
-    const rows = db
-      .prepare(
-        "SELECT slot_time FROM slots " +
-          "WHERE slot_date = ? AND status = 'free' " +
-          "ORDER BY slot_time",
-      )
-      .all(date) as SlotRow[];
+    const rows = (await sql`
+      SELECT TO_CHAR(slot_time, 'HH24:MI') AS slot_time
+      FROM slots
+      WHERE slot_date = ${date}::DATE
+        AND status = 'free'
+      ORDER BY slot_time
+    `) as SlotRow[];
 
     return rows.map((r) => ({ date, time: r.slot_time }));
   },

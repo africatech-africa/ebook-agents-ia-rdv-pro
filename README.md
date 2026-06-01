@@ -110,7 +110,7 @@ Légende : ✅ publié · 🚧 en cours · ⬜ à venir
 - ✅ Chapitre 4 — Les tools : donner des super-pouvoirs au LLM
 - ✅ Chapitre 5 — Le pattern ReAct : ton premier vrai agent
 - ✅ Chapitre 6 — La mémoire : faire qu'un agent se souvienne
-- ⬜ Chapitre 7 — RAG : connecter un agent à tes données
+- ✅ Chapitre 7 — RAG : connecter un agent à tes données
 - ⬜ Chapitre 8 — Workflows vs agents autonomes
 - ⬜ Chapitre 9 — Multi-agents : faire collaborer plusieurs IAs
 - ⬜ Chapitre 10 — MCP : le standard pour brancher des outils

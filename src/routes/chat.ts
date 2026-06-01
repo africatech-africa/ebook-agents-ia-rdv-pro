@@ -4,6 +4,7 @@ import { streamText, stepCountIs } from "ai";
 import { google, FLASH } from "../lib/llm";
 import { getSlots } from "../agents/tools/get-slots";
 import { bookSlot } from "../agents/tools/book-slot";
+import { searchKnowledge } from "../agents/tools/search-knowledge";
 import {
   loadHistory,
   newConversationId,
@@ -19,20 +20,22 @@ aux clientes en français, avec un ton chaleureux et concis.
 La date du jour est ${today} (format YYYY-MM-DD).
 
 OUTILS DISPONIBLES :
-- getSlots(date)               : liste les créneaux libres d'une
-  date (format YYYY-MM-DD).
+- getSlots(date)               : créneaux libres d'une date.
 - bookSlot(date, time, name)   : RÉSERVE un créneau pour une
   cliente nommée.
+- searchKnowledge(query)       : cherche dans les infos du salon
+  (services, prix, politique d'annulation, FAQ).
 
 RÈGLES IMPÉRATIVES :
 - Pour TOUTE question sur les disponibilités, appelle getSlots
   AVANT de répondre.
+- Pour TOUTE question sur les services, prix ou politiques,
+  appelle searchKnowledge et réponds UNIQUEMENT avec ce qu'il
+  renvoie. Si rien n'est pertinent, dis-le honnêtement.
 - N'utilise bookSlot QUE si la cliente a explicitement demandé
-  de réserver ET t'a donné un nom (prénom + nom de préférence).
-  Si l'une des deux infos manque, demande-la — ne réserve pas.
-- N'invente JAMAIS un créneau, un horaire ou un nom.
-- Après un appel bookSlot réussi, confirme à la cliente avec la
-  date, l'heure et son nom.`;
+  de réserver ET t'a donné un nom. Sinon, demande l'info manquante.
+- N'invente JAMAIS un créneau, un prix, un horaire ou un nom.
+- Après un bookSlot réussi, confirme avec date, heure et nom.`;
 }
 
 chatRoute.post("/", async (c) => {
@@ -49,12 +52,11 @@ chatRoute.post("/", async (c) => {
     );
   }
 
-  // Persist the user message, then reload the full history so the
-  // model sees every prior turn (multi-turn memory).
+  // DB calls are async now (Postgres). Persist, then reload.
   const conversationId =
     body.conversationId ?? newConversationId();
-  saveMessage(conversationId, "user", message);
-  const history = loadHistory(conversationId);
+  await saveMessage(conversationId, "user", message);
+  const history = await loadHistory(conversationId);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -65,7 +67,7 @@ chatRoute.post("/", async (c) => {
       role: m.role,
       content: m.content,
     })),
-    tools: { getSlots, bookSlot },
+    tools: { getSlots, bookSlot, searchKnowledge },
     stopWhen: stepCountIs(5),
     temperature: 0.3,
   });
@@ -79,7 +81,7 @@ chatRoute.post("/", async (c) => {
       await s.write(chunk);
     }
     if (assistantText.trim().length > 0) {
-      saveMessage(conversationId, "assistant", assistantText);
+      await saveMessage(conversationId, "assistant", assistantText);
     }
   });
 });

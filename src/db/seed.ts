@@ -1,52 +1,95 @@
-// src/db/seed.ts — fill the local SQLite database with demo data.
+// src/db/seed.ts — Populate the Postgres database with demo data.
 //
 // Run it with:  npm run seed
 //
-// Generates a week of slots (Sundays closed) and pre-books a few of
-// them, so getSlots returns a realistic, varied result.
+// Ensures the schema, wipes the booking-related tables, then
+// regenerates appointment slots for the next 7 days (skipping
+// Sundays) — hourly from 09:00 to 17:00 with a lunch break at 13:00.
+// A handful of slots are pre-booked with realistic French-speaking
+// client names, so the getSlots tool of chapter 4 has something
+// useful to return.
+//
+// The knowledge_chunks table is seeded by a separate script
+// (`npm run seed:knowledge`, chapter 7) because it makes one
+// embedding API call per chunk.
 
-import { readFileSync } from "node:fs";
-import { db } from "./client";
+import { sql } from "./client";
+import { ensureSchema } from "./schema";
 
-const schema = readFileSync(
-  new URL("./schema.sql", import.meta.url),
-  "utf8",
-);
+const HOURS = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+];
 
-db.exec("DROP TABLE IF EXISTS slots;");
-db.exec("DROP TABLE IF EXISTS messages;");
-db.exec(schema);
+// Hardcoded bookings to make availability realistic.
+// Keys are "<dayOffset>:<HH:MM>".
+const bookings = new Set([
+  "0:10:00",
+  "0:14:00",
+  "1:09:00",
+  "1:15:00",
+  "3:11:00",
+]);
 
-const HOURS = ["09:00", "10:00", "11:00", "12:00",
-               "14:00", "15:00", "16:00", "17:00"];
+const clientNames = [
+  "Awa Diop",
+  "Fatou Traoré",
+  "Mariam K.",
+  "Aïcha B.",
+  "Sophie L.",
+];
 
-const insert = db.prepare(
-  "INSERT INTO slots (slot_date, slot_time, status, client_name) " +
-    "VALUES (?, ?, ?, ?)",
-);
+async function main() {
+  await ensureSchema();
 
-// A few pre-booked slots, keyed by "offset:time", to make the
-// demo data look real (some clients already booked).
-const booked: Record<string, string> = {
-  "0:10:00": "Awa Traoré",
-  "1:15:00": "Fatou Diallo",
-  "2:09:00": "Mariam Koné",
-};
+  // Wipe ONLY the booking tables. Knowledge stays — it is expensive
+  // to recompute and changes rarely.
+  await sql`TRUNCATE TABLE slots RESTART IDENTITY`;
+  await sql`TRUNCATE TABLE messages RESTART IDENTITY`;
 
-// 7 days from today, Sundays excluded.
-for (let offset = 0; offset < 7; offset++) {
-  const day = new Date();
-  day.setDate(day.getDate() + offset);
-  if (day.getDay() === 0) continue; // closed on Sundays
-  const dateStr = day.toISOString().slice(0, 10);
-  for (const time of HOURS) {
-    const client = booked[`${offset}:${time}`] ?? null;
-    const status = client ? "booked" : "free";
-    insert.run(dateStr, time, status, client);
+  const today = new Date();
+  let inserted = 0;
+  let booked = 0;
+  let clientIdx = 0;
+
+  for (let offset = 0; offset < 7; offset++) {
+    const day = new Date(today);
+    day.setDate(day.getDate() + offset);
+    if (day.getDay() === 0) continue; // Sundays: salon closed.
+    const dateStr = day.toISOString().slice(0, 10);
+
+    for (const time of HOURS) {
+      const key = `${offset}:${time}`;
+      if (bookings.has(key)) {
+        const name = clientNames[clientIdx % clientNames.length];
+        await sql`
+          INSERT INTO slots (slot_date, slot_time, status, client_name)
+          VALUES (${dateStr}::DATE, ${time}::TIME, 'booked', ${name})
+        `;
+        clientIdx++;
+        booked++;
+      } else {
+        await sql`
+          INSERT INTO slots (slot_date, slot_time, status, client_name)
+          VALUES (${dateStr}::DATE, ${time}::TIME, 'free', NULL)
+        `;
+      }
+      inserted++;
+    }
   }
+
+  console.log(
+    `Seed terminé : ${inserted} créneaux (${booked} déjà réservés).`,
+  );
 }
 
-const count = db
-  .prepare("SELECT COUNT(*) AS n FROM slots")
-  .get() as { n: number };
-console.log(`Seed done — ${count.n} slots in rdv-pro.db.`);
+main().catch((err) => {
+  console.error("Seed failed:", err);
+  process.exit(1);
+});

@@ -7,6 +7,53 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.7.0] - Chapitre 7 — RAG : connecter un agent à tes données
+
+### Added
+
+- Chapitre 7 (`ebook/07-rag.md`) — pourquoi un agent doit s'ancrer,
+  chunks, embeddings, distance cosinus, `taskType`, retrieve-then-
+  generate, pgvector et tour d'horizon des variations (reranking,
+  hybrid search, chunking avancé).
+- Corpus d'exemple `knowledge/{about,faq,policies,services}.md` —
+  19 chunks couvrant services, prix, politiques, FAQ et infos
+  pratiques du salon Élégance.
+- Wrapper d'embeddings `src/lib/embeddings.ts` —
+  `gemini-embedding-001` à 768 dimensions, avec `taskType` correct
+  par cas d'usage (`RETRIEVAL_DOCUMENT` à l'ingestion,
+  `RETRIEVAL_QUERY` à la recherche).
+- Pipeline d'ingestion `src/db/seed-knowledge.ts` — découpage des
+  markdowns par section H2, embed batché, insertion vectorielle.
+- Tool RAG `src/agents/tools/search-knowledge.ts` — recherche
+  cosine top-3 via pgvector, renvoie source + contenu + similarité.
+- Schéma TypeScript idempotent `src/db/schema.ts` — remplace le
+  `schema.sql` SQLite ; déclare la table `knowledge_chunks` avec
+  `VECTOR(768)`.
+- Script npm `seed:knowledge`.
+
+### Changed
+
+- **Migration SQLite → Postgres (Neon).** `src/db/client.ts` passe
+  de `better-sqlite3` à `@neondatabase/serverless` (driver HTTP),
+  `sql` devient une fonction tagged-template asynchrone.
+- `src/db/messages.ts`, `src/db/seed.ts`, les tools `get-slots` et
+  `book-slot` passent en async/await ; `book-slot` détecte la
+  collision via `RETURNING id` au lieu de `.changes`.
+- `src/routes/chat.ts` — branche `searchKnowledge`, durcit le
+  system prompt pour interdire les réponses factuelles non
+  sourcées, ajoute les `await` sur la couche DB.
+- `.env.example` — `DATABASE_URL` ajoutée comme variable
+  obligatoire à partir de ce chapitre.
+
+### Removed
+
+- `src/db/schema.sql` — remplacé par `src/db/schema.ts`.
+- `better-sqlite3` et `@types/better-sqlite3` — désinstallés.
+
+### Dependencies
+
+- `@neondatabase/serverless@^1.1.0`.
+
 ## [0.6.0] - Chapitre 6 — La mémoire : faire qu'un agent se souvienne
 
 ### Added
