@@ -14,6 +14,7 @@ const schema = readFileSync(
 );
 
 db.exec("DROP TABLE IF EXISTS slots;");
+db.exec("DROP TABLE IF EXISTS messages;");
 db.exec(schema);
 
 const HOURS = ["09:00", "10:00", "11:00", "12:00",

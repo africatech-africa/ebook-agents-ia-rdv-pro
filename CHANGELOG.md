@@ -7,6 +7,27 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.6.0] - Chapitre 6 — La mémoire : faire qu'un agent se souvienne
+
+### Added
+
+- Chapitre 6 (`ebook/06-la-memoire.md`) — endpoint stateless,
+  conversation ID, `messages` array, context window growth et
+  stratégies de mémoire (fenêtre glissante, résumé glissant).
+- Table SQL `messages` (`src/db/schema.sql`) avec index par
+  conversation.
+- Module `src/db/messages.ts` : `newConversationId`,
+  `loadHistory`, `saveMessage`.
+
+### Changed
+
+- `src/routes/chat.ts` — accepte un `conversationId` optionnel,
+  charge l'historique depuis la base, passe `messages: [...]` au
+  SDK au lieu de `prompt`, renvoie l'identifiant dans l'en-tête
+  `X-Conversation-Id`, persiste la réponse finale.
+- `src/db/seed.ts` — drop des deux tables au reseed pour repartir
+  propre.
+
 ## [0.5.0] - Chapitre 5 — Le pattern ReAct : ton premier vrai agent
 
 ### Added
