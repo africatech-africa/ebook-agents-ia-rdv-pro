@@ -115,7 +115,7 @@ Légende : ✅ publié · 🚧 en cours · ⬜ à venir
 - ✅ Chapitre 9 — Multi-agents : faire collaborer plusieurs IAs
 - ✅ Chapitre 10 — MCP : le standard pour brancher des outils
 - ✅ Chapitre 11 — Observabilité, évals et debugging
-- ⬜ Chapitre 12 — Sécurité, coûts et déploiement
+- ✅ Chapitre 12 — Sécurité, coûts et déploiement
 
 > **Progression : chapitre 1/12.** Cette branche (`chapitre-01-*`, tag `v0.1.0`) reflète le code à la fin du chapitre 1. La suite arrive chapitre après chapitre.
 

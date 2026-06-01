@@ -1,0 +1,29 @@
+# .dockerignore — Keep secrets and bulk OUT of the build context.
+
+# Secrets — NEVER ship a real .env into an image.
+.env
+.env.*
+
+# Local artifacts.
+node_modules/
+dist/
+build/
+*.log
+*.db
+*.sqlite*
+
+# Source control / editors.
+.git/
+.github/
+.gitignore
+.idea/
+.vscode/
+
+# Ebook content — text files, not needed in the runtime image.
+ebook/
+scripts/
+evals/
+
+# Misc
+*.md
+!README.md
