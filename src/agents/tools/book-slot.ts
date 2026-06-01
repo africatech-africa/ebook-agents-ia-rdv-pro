@@ -1,6 +1,23 @@
+// src/agents/tools/book-slot.ts — Booking tool (write).
+//
+// Marks a (date, time) slot as booked for a given client. The SQL
+// UPDATE only succeeds if the slot is currently 'free', so two
+// concurrent bookings cannot both win — the second one gets back
+// zero updated rows and a clean "not available" message.
+//
+// This is read+WRITE territory now: an agent that calls this tool is
+// modifying the world. The system prompt MUST require explicit
+// consent from the client before the model invokes it.
+//
+// Chapter 8: after a successful booking, the tool emits a
+// `booking/created` event. Inngest fans the event out to the
+// confirmation and reminder workflows — the LLM never sees that
+// part of the system.
+
 import { tool } from "ai";
 import { z } from "zod";
 import { sql } from "../../db/client";
+import { inngest } from "../../inngest/client";
 
 export const bookSlot = tool({
   description:
@@ -27,9 +44,10 @@ export const bookSlot = tool({
   }),
 
   execute: async ({ date, time, clientName }) => {
-    // RETURNING tells us whether a row was actually updated. An
-    // empty result set means the WHERE clause matched nothing
-    // (slot already booked or non-existent).
+    // RETURNING tells us whether a row was actually updated. With
+    // SQLite we used `.changes`; in Postgres, an empty result set
+    // means the WHERE clause matched nothing (slot already booked
+    // or non-existent).
     const updated = await sql`
       UPDATE slots
       SET status = 'booked',
@@ -48,6 +66,15 @@ export const bookSlot = tool({
           `(déjà réservé ou inexistant).`,
       };
     }
+
+    // Fire-and-forget event: confirmation and reminder workflows
+    // pick it up from here. We `await` only to surface delivery
+    // errors to the agent's trace — the actual work happens
+    // asynchronously in Inngest.
+    await inngest.send({
+      name: "booking/created",
+      data: { date, time, clientName },
+    });
 
     return {
       success: true,

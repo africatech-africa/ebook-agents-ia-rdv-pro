@@ -7,6 +7,36 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.8.0] - Chapitre 8 — Workflows vs agents autonomes
+
+### Added
+
+- Chapitre 8 (`ebook/08-workflows.md`) — agent vs workflow, événement
+  pub/sub, `step.run` atomique, `step.sleepUntil` longue durée,
+  retries automatiques, idempotence, quand NE PAS utiliser un
+  workflow.
+- Couche Inngest : client unique (`src/inngest/client.ts`), événement
+  typé `bookingCreated` (`src/inngest/events.ts`), deux workflows :
+  - `confirmBooking` (`src/inngest/functions/confirm-booking.ts`)
+    fire immédiatement sur `booking/created`.
+  - `remindBooking` (`src/inngest/functions/remind-booking.ts`)
+    `sleepUntil` la veille à 18 h UTC, puis envoie le rappel.
+- Mock de notification `src/lib/notify.ts` (`sendWhatsApp`) — sera
+  remplacé par Twilio/WhatsApp Business en variation.
+
+### Changed
+
+- `src/index.ts` — monte le handler Inngest sur `/api/inngest` via
+  `inngest/hono`.
+- `src/agents/tools/book-slot.ts` — `await inngest.send` après la
+  réservation réussie. Le tool ne sait rien des workflows ; il
+  publie un événement.
+- `.env.example` — variable `INNGEST_DEV=1` documentée (dev local).
+
+### Dependencies
+
+- `inngest@^4.4.0`.
+
 ## [0.7.0] - Chapitre 7 — RAG : connecter un agent à tes données
 
 ### Added
