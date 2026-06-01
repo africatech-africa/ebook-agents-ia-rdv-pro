@@ -7,6 +7,22 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.3.0] - Chapitre 3 — Premier contact : ton premier appel à Gemini en TypeScript
+
+### Added
+
+- Chapitre 3 (`ebook/03-premier-contact.md`) — `tsconfig.json` en
+  profondeur, ESM vs CommonJS, mise en place du serveur HTTP avec
+  Hono, et streaming HTTP token par token.
+- Serveur Hono dans `src/index.ts` (bascule depuis le script de
+  catalogue du chapitre 1).
+- Endpoint `GET /health` (`src/routes/health.ts`) et endpoint
+  streaming `POST /chat` (`src/routes/chat.ts`).
+
+### Dependencies
+
+- `hono@^4.12.22`, `@hono/node-server@^2.0.3`.
+
 ## [0.2.0] - Chapitre 2 — Comment fonctionne un LLM (sans maths)
 
 ### Added
@@ -15,8 +31,8 @@ chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
   LLM (token, prompt, system prompt, context window, temperature,
   hallucination) et premier vrai appel à Gemini depuis RDV-Pro.
 - Wrapper Vercel AI SDK (`src/lib/llm.ts`) — provider Google
-  Generative AI partagé par tous les scripts, avec `baseURL` épinglé
-  et constantes de modèles (`FLASH`, `PRO`).
+  partagé par tous les scripts, avec `baseURL` épinglé et constantes
+  de modèles (`FLASH`, `PRO`).
 - Script de génération de descriptions commerciales
   (`src/generate-descriptions.ts`) — premier appel LLM réel sur le
   catalogue du salon.
