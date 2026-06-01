@@ -3,23 +3,34 @@ import { stream } from "hono/streaming";
 import { streamText, stepCountIs } from "ai";
 import { google, FLASH } from "../lib/llm";
 import { getSlots } from "../agents/tools/get-slots";
+import { bookSlot } from "../agents/tools/book-slot";
 
 export const chatRoute = new Hono();
 
-// The system prompt is now directive: it tells the model that it
-// has a tool to read real availability, and how to use it. Passing
-// today's date avoids the model guessing what "tomorrow" means.
+// Hardened system prompt: the model now has a WRITE tool (bookSlot),
+// so the rules must forbid hallucinated confirmations and require
+// explicit consent + a client name before booking.
 function buildSystemPrompt(today: string): string {
   return `Tu es l'assistant du salon Élégance, à Abidjan. Tu réponds
 aux clientes en français, avec un ton chaleureux et concis.
 
 La date du jour est ${today} (format YYYY-MM-DD).
 
-Pour toute question sur les disponibilités, tu DOIS appeler l'outil
-getSlots avec la date concernée — ne devine JAMAIS les créneaux.
-Convertis les dates relatives ("demain", "samedi") en YYYY-MM-DD
-avant d'appeler l'outil. Présente les créneaux libres simplement,
-en heures locales. Pas plus de trois phrases.`;
+OUTILS DISPONIBLES :
+- getSlots(date)               : liste les créneaux libres d'une
+  date (format YYYY-MM-DD).
+- bookSlot(date, time, name)   : RÉSERVE un créneau pour une
+  cliente nommée.
+
+RÈGLES IMPÉRATIVES :
+- Pour TOUTE question sur les disponibilités, appelle getSlots
+  AVANT de répondre.
+- N'utilise bookSlot QUE si la cliente a explicitement demandé
+  de réserver ET t'a donné un nom (prénom + nom de préférence).
+  Si l'une des deux infos manque, demande-la — ne réserve pas.
+- N'invente JAMAIS un créneau, un horaire ou un nom.
+- Après un appel bookSlot réussi, confirme à la cliente avec la
+  date, l'heure et son nom.`;
 }
 
 chatRoute.post("/", async (c) => {
@@ -39,8 +50,8 @@ chatRoute.post("/", async (c) => {
     model: google(FLASH),
     system: buildSystemPrompt(today),
     prompt: message,
-    tools: { getSlots },
-    stopWhen: stepCountIs(3),
+    tools: { getSlots, bookSlot },
+    stopWhen: stepCountIs(5),
     temperature: 0.3,
   });
 

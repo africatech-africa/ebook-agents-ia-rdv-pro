@@ -7,6 +7,23 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.5.0] - Chapitre 5 — Le pattern ReAct : ton premier vrai agent
+
+### Added
+
+- Chapitre 5 (`ebook/05-pattern-react.md`) — pattern ReAct,
+  durcissement des tools en écriture, gestion de race condition au
+  niveau SQL.
+- Tool d'écriture `bookSlot(date, time, clientName)`
+  (`src/agents/tools/book-slot.ts`), avec `UPDATE … WHERE
+  status='free'` pour une écriture atomique anti-double-booking.
+
+### Changed
+
+- `src/routes/chat.ts` — branche `bookSlot`, system prompt durci
+  contre les confirmations hallucinées, `stopWhen` passé à 5
+  étapes pour permettre le chemin de récupération.
+
 ## [0.4.0] - Chapitre 4 — Les tools : donner des super-pouvoirs au LLM
 
 ### Added

@@ -108,7 +108,7 @@ Légende : ✅ publié · 🚧 en cours · ⬜ à venir
 - ✅ Chapitre 2 — Comment fonctionne un LLM (sans maths)
 - ✅ Chapitre 3 — Premier contact : ton premier appel à Gemini en TypeScript
 - ✅ Chapitre 4 — Les tools : donner des super-pouvoirs au LLM
-- ⬜ Chapitre 5 — Le pattern ReAct : ton premier vrai agent
+- ✅ Chapitre 5 — Le pattern ReAct : ton premier vrai agent
 - ⬜ Chapitre 6 — La mémoire : faire qu'un agent se souvienne
 - ⬜ Chapitre 7 — RAG : connecter un agent à tes données
 - ⬜ Chapitre 8 — Workflows vs agents autonomes
