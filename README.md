@@ -105,7 +105,7 @@ Commence par la [préface](./ebook/00-preface.md) puis la
 Légende : ✅ publié · 🚧 en cours · ⬜ à venir
 
 - ✅ Chapitre 1 — Pourquoi les agents IA changent le développement
-- ⬜ Chapitre 2 — Comment fonctionne un LLM (sans maths)
+- ✅ Chapitre 2 — Comment fonctionne un LLM (sans maths)
 - ⬜ Chapitre 3 — Premier contact : ton premier appel à Gemini en TypeScript
 - ⬜ Chapitre 4 — Les tools : donner des super-pouvoirs au LLM
 - ⬜ Chapitre 5 — Le pattern ReAct : ton premier vrai agent

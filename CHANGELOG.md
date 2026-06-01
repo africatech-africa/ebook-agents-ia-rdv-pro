@@ -7,6 +7,25 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.2.0] - Chapitre 2 — Comment fonctionne un LLM (sans maths)
+
+### Added
+
+- Chapitre 2 (`ebook/02-comment-fonctionne-un-llm.md`) — anatomie d'un
+  LLM (token, prompt, system prompt, context window, temperature,
+  hallucination) et premier vrai appel à Gemini depuis RDV-Pro.
+- Wrapper Vercel AI SDK (`src/lib/llm.ts`) — provider Google
+  Generative AI partagé par tous les scripts, avec `baseURL` épinglé
+  et constantes de modèles (`FLASH`, `PRO`).
+- Script de génération de descriptions commerciales
+  (`src/generate-descriptions.ts`) — premier appel LLM réel sur le
+  catalogue du salon.
+- Script npm `generate-descriptions`.
+
+### Dependencies
+
+- `ai@^6.0.190`, `@ai-sdk/google@^3.0.79`, `dotenv@^17.4.2`.
+
 ## [0.1.0] - Chapitre 1 — Pourquoi les agents IA changent le développement
 
 ### Added
@@ -20,3 +39,15 @@ chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
   classique, anatomie d'un agent, pourquoi TypeScript.
 - Premier script TypeScript : le catalogue des prestations du salon
   (`src/index.ts`) — introduit `type`, annotations de type, `tsx`.
+
+<!--
+Modèle d'entrée pour chaque chapitre, à recopier :
+
+## [0.5.0] - Chapitre 5 — Le pattern ReAct
+### Added
+- Booking agent ReAct (`src/agents/booking-agent.ts`)
+- Tools `getSlots` et `bookSlot` (`src/agents/tools/`)
+- Route `POST /chat` branchée sur l'agent (`src/routes/chat.ts`)
+### Changed
+- Schéma SQLite : ajout du statut "pending" sur les rendez-vous
+-->
