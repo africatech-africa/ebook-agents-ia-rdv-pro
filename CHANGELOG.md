@@ -7,6 +7,32 @@ projet suit le [versionnage sémantique](https://semver.org/lang/fr/). **Chaque
 chapitre de l'ebook correspond à une version** : `v0.1.0` = fin du chapitre 1,
 `v1.0.0` = fin du chapitre 12.
 
+## [0.9.0] - Chapitre 9 — Multi-agents : faire collaborer plusieurs IAs
+
+### Added
+
+- Chapitre 9 (`ebook/09-multi-agents.md`) — patron router +
+  spécialistes, handoff implicite, sticky routing, supervisor en
+  variation, garde-fous des couloirs (un tool dans un seul agent).
+- Trois agents spécialisés :
+  - `src/agents/booking-agent.ts` (getSlots, bookSlot,
+    searchKnowledge).
+  - `src/agents/support-agent.ts` (cancelBooking, searchKnowledge).
+  - `src/agents/marketing-agent.ts` (searchKnowledge only).
+- Router `src/agents/router.ts` — `generateObject` + Zod enum,
+  Gemini Flash thinking-off à température 0.
+- Nouveau tool d'écriture `src/agents/tools/cancel-booking.ts` —
+  UPDATE sur (date, time, status='booked', client_name) avec
+  RETURNING, puis `inngest.send('booking/cancelled')`.
+- Événement Inngest typé `bookingCancelled` dans
+  `src/inngest/events.ts` (symétrique de `bookingCreated`).
+
+### Changed
+
+- `src/routes/chat.ts` — appelle `routeIntent`, dispatche vers
+  l'agent désigné, expose le choix dans l'en-tête `X-Agent`. La
+  mémoire de conversation reste partagée entre agents.
+
 ## [0.8.0] - Chapitre 8 — Workflows vs agents autonomes
 
 ### Added

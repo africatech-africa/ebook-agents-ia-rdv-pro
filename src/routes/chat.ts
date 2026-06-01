@@ -1,10 +1,22 @@
+// src/routes/chat.ts — POST /chat with multi-agent routing.
+//
+// Chapter 9: instead of a single all-purpose agent, the request is
+// first classified by the router (one small LLM call), then
+// dispatched to ONE of three specialists (booking, support,
+// marketing). Each specialist owns its tools and its system prompt.
+// The conversation history is shared, so the active agent can
+// change between turns and still see everything said before.
+//
+// The chosen agent name is returned in the X-Agent header so the
+// client can show a "transferred to support" hint if useful.
+
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { streamText, stepCountIs } from "ai";
-import { google, FLASH } from "../lib/llm";
-import { getSlots } from "../agents/tools/get-slots";
-import { bookSlot } from "../agents/tools/book-slot";
-import { searchKnowledge } from "../agents/tools/search-knowledge";
+import { bookingAgent } from "../agents/booking-agent";
+import { supportAgent } from "../agents/support-agent";
+import { marketingAgent } from "../agents/marketing-agent";
+import { routeIntent, type AgentName } from "../agents/router";
 import {
   loadHistory,
   newConversationId,
@@ -13,30 +25,11 @@ import {
 
 export const chatRoute = new Hono();
 
-function buildSystemPrompt(today: string): string {
-  return `Tu es l'assistant du salon Élégance, à Abidjan. Tu réponds
-aux clientes en français, avec un ton chaleureux et concis.
-
-La date du jour est ${today} (format YYYY-MM-DD).
-
-OUTILS DISPONIBLES :
-- getSlots(date)               : créneaux libres d'une date.
-- bookSlot(date, time, name)   : RÉSERVE un créneau pour une
-  cliente nommée.
-- searchKnowledge(query)       : cherche dans les infos du salon
-  (services, prix, politique d'annulation, FAQ).
-
-RÈGLES IMPÉRATIVES :
-- Pour TOUTE question sur les disponibilités, appelle getSlots
-  AVANT de répondre.
-- Pour TOUTE question sur les services, prix ou politiques,
-  appelle searchKnowledge et réponds UNIQUEMENT avec ce qu'il
-  renvoie. Si rien n'est pertinent, dis-le honnêtement.
-- N'utilise bookSlot QUE si la cliente a explicitement demandé
-  de réserver ET t'a donné un nom. Sinon, demande l'info manquante.
-- N'invente JAMAIS un créneau, un prix, un horaire ou un nom.
-- Après un bookSlot réussi, confirme avec date, heure et nom.`;
-}
+const agents = {
+  booking: bookingAgent,
+  support: supportAgent,
+  marketing: marketingAgent,
+} as const;
 
 chatRoute.post("/", async (c) => {
   const body = await c.req.json<{
@@ -52,27 +45,35 @@ chatRoute.post("/", async (c) => {
     );
   }
 
-  // DB calls are async now (Postgres). Persist, then reload.
   const conversationId =
     body.conversationId ?? newConversationId();
   await saveMessage(conversationId, "user", message);
   const history = await loadHistory(conversationId);
 
+  // Route AFTER persisting and reloading: the router sees the full
+  // history (minus the just-saved message, passed separately).
+  const { agent: agentName } = await routeIntent(
+    history.slice(0, -1),
+    message,
+  );
+  const agent = agents[agentName as AgentName];
+
   const today = new Date().toISOString().slice(0, 10);
 
   const result = streamText({
-    model: google(FLASH),
-    system: buildSystemPrompt(today),
+    model: agent.model,
+    system: agent.system(today),
     messages: history.map((m) => ({
       role: m.role,
       content: m.content,
     })),
-    tools: { getSlots, bookSlot, searchKnowledge },
+    tools: agent.tools,
     stopWhen: stepCountIs(5),
     temperature: 0.3,
   });
 
   c.header("X-Conversation-Id", conversationId);
+  c.header("X-Agent", agentName);
 
   return stream(c, async (s) => {
     let assistantText = "";
