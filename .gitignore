@@ -1,0 +1,31 @@
+# Dépendances
+node_modules/
+
+# Variables d'environnement — ne JAMAIS commiter les vraies clés
+.env
+.env.local
+.env.*.local
+
+# Base de données SQLite locale (générée par `npm run seed`)
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.sqlite-shm
+*.sqlite-wal
+
+# Logs et fichiers temporaires
+*.log
+npm-debug.log*
+
+# Build / sortie (on exécute via tsx, mais au cas où)
+dist/
+build/
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

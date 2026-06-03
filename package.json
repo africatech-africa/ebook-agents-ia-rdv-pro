@@ -1,0 +1,21 @@
+{
+  "name": "rdv-pro-starter",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Point de départ vide du projet RDV-Pro — tu écris le code chapitre par chapitre en suivant l'ebook « Créer des agents IA en TypeScript ».",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  }
+}
